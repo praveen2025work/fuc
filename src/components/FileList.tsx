@@ -84,10 +84,13 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   };
 
   const handleClearAllFilters = () => {
-    const emptyFilters = {};
-    setFilters(emptyFilters);
-    // Automatically trigger search with empty filters
-    fetchFiles(emptyFilters);
+    const defaultFilters = {
+      from_date: getTodayDate(),
+      to_date: getTodayDate(),
+    };
+    setFilters(defaultFilters);
+    // Automatically trigger search with default filters
+    fetchFiles(defaultFilters);
   };
 
   const hasActiveFilters = () => {
