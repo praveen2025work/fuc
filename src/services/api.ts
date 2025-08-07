@@ -49,9 +49,7 @@ api.interceptors.response.use(
 export const apiService = {
   // Get current user (Windows authentication)
   async getCurrentUser(): Promise<User> {
-    const response: AxiosResponse<User> = await userApi.get(
-      API_CONFIG.endpoints.user
-    );
+    const response: AxiosResponse<User> = await userApi.get('');
     return response.data;
   },
 
