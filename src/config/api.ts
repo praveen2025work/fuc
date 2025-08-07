@@ -1,6 +1,8 @@
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  userApiURL: 'http://ldndsm:9521',
   endpoints: {
+    user: '/api/user',
     health: '/api/health',
     upload: '/api/upload',
     share: '/api/share',

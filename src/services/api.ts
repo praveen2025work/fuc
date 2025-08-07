@@ -6,7 +6,8 @@ import {
   UploadData, 
   FileUpload, 
   ShareRequest, 
-  UploadFilters 
+  UploadFilters,
+  User 
 } from '@/types/api';
 
 const api = axios.create({
@@ -14,12 +15,19 @@ const api = axios.create({
   timeout: 30000,
 });
 
+// Create separate instance for user API
+const userApi = axios.create({
+  baseURL: API_CONFIG.userApiURL,
+  timeout: 10000,
+  withCredentials: true, // For Windows authentication
+});
+
 // Add request interceptor to include X-User-Id header
 api.interceptors.request.use((config) => {
   const userData = localStorage.getItem('fileUploadUser');
   if (userData) {
     const user = JSON.parse(userData);
-    config.headers['X-User-Id'] = user.user_id;
+    config.headers['X-User-Id'] = user.userName;
   }
   return config;
 });
@@ -39,6 +47,14 @@ api.interceptors.response.use(
 );
 
 export const apiService = {
+  // Get current user (Windows authentication)
+  async getCurrentUser(): Promise<User> {
+    const response: AxiosResponse<User> = await userApi.get(
+      API_CONFIG.endpoints.user
+    );
+    return response.data;
+  },
+
   // Health check
   async checkHealth(): Promise<ApiResponse<HealthData>> {
     const response: AxiosResponse<ApiResponse<HealthData>> = await api.get(

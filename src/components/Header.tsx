@@ -27,10 +27,7 @@ const Header: React.FC = () => {
           <div className="p-2 bg-primary rounded-lg">
             <FileText className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-primary">File Upload Center</h1>
-            <p className="text-xs text-muted-foreground">Secure file management system</p>
-          </div>
+          <h1 className="text-xl font-bold text-primary">File Upload Center</h1>
         </div>
 
         {/* User Info and Logout */}
@@ -44,18 +41,18 @@ const Header: React.FC = () => {
             <div className="text-right hidden sm:block">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-foreground">{user.display_name}</span>
+                <span className="font-medium text-foreground">{user.displayName}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>ID: {user.user_id}</span>
+                <span>ID: {user.userName}</span>
                 <span>•</span>
-                <span>Emp: {user.employee_id}</span>
+                <span>Emp: {user.employeeId}</span>
               </div>
             </div>
             
             <div className="sm:hidden">
               <Badge variant="secondary" className="text-xs">
-                {user.display_name}
+                {user.displayName}
               </Badge>
             </div>
 

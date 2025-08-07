@@ -1,7 +1,16 @@
 export interface User {
-  user_id: string;
-  display_name: string;
-  employee_id: string;
+  samAccountName: string;
+  description: string;
+  displayName: string;
+  distinguishedName: string;
+  emailAddress: string;
+  employeeId: string;
+  name: string;
+  givenName: string;
+  middleName: string | null;
+  surname: string;
+  domain: string | null;
+  userName: string;
 }
 
 export interface ApiResponse<T = any> {
