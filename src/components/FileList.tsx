@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/services/api';
 import { FileUpload, UploadFilters } from '@/types/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { Files, Download, Share2, Search, Calendar, RefreshCw, User, AlertCircle } from 'lucide-react';
+import { Files, Download, Share2, Search, Calendar, RefreshCw, User, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -62,6 +62,22 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
 
   const handleSearch = () => {
     fetchFiles();
+  };
+
+  const handleClearFilter = (key: keyof UploadFilters) => {
+    setFilters(prev => {
+      const newFilters = { ...prev };
+      delete newFilters[key];
+      return newFilters;
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setFilters({});
+  };
+
+  const hasActiveFilters = () => {
+    return Object.keys(filters).some(key => filters[key as keyof UploadFilters]);
   };
 
   const handleDownload = async (file: FileUpload) => {
@@ -150,47 +166,101 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
           )}
 
           {/* Filters */}
-          <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${!isAuthenticated ? 'opacity-50' : ''}`}>
-            <div className="space-y-2">
-              <Label htmlFor="fromDate">From Date</Label>
-              <Input
-                id="fromDate"
-                type="date"
-                value={filters.from_date || ''}
-                onChange={(e) => handleFilterChange('from_date', e.target.value)}
-                disabled={!isAuthenticated}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-              />
+          <div className={`space-y-4 ${!isAuthenticated ? 'opacity-50' : ''}`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="fromDate">From Date</Label>
+                  {filters.from_date && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearFilter('from_date')}
+                      disabled={!isAuthenticated}
+                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  id="fromDate"
+                  type="date"
+                  value={filters.from_date || ''}
+                  onChange={(e) => handleFilterChange('from_date', e.target.value)}
+                  disabled={!isAuthenticated}
+                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="toDate">To Date</Label>
+                  {filters.to_date && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearFilter('to_date')}
+                      disabled={!isAuthenticated}
+                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  id="toDate"
+                  type="date"
+                  value={filters.to_date || ''}
+                  onChange={(e) => handleFilterChange('to_date', e.target.value)}
+                  disabled={!isAuthenticated}
+                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="search">Search Filename</Label>
+                  {filters.search && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearFilter('search')}
+                      disabled={!isAuthenticated}
+                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  id="search"
+                  type="text"
+                  placeholder="Search files..."
+                  value={filters.search || ''}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  disabled={!isAuthenticated}
+                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="toDate">To Date</Label>
-              <Input
-                id="toDate"
-                type="date"
-                value={filters.to_date || ''}
-                onChange={(e) => handleFilterChange('to_date', e.target.value)}
-                disabled={!isAuthenticated}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="search">Search Filename</Label>
-              <Input
-                id="search"
-                type="text"
-                placeholder="Search files..."
-                value={filters.search || ''}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                disabled={!isAuthenticated}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>&nbsp;</Label>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-2 justify-end">
+              {hasActiveFilters() && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearAllFilters}
+                  disabled={!isAuthenticated}
+                  className="hover:bg-muted/50 transition-colors"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Clear All
+                </Button>
+              )}
               <Button
                 onClick={handleSearch}
                 disabled={!isAuthenticated || loading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {loading ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
