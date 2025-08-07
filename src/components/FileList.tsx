@@ -27,7 +27,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
 
-  const fetchFiles = async () => {
+  const fetchFiles = async (customFilters?: UploadFilters) => {
     if (!isAuthenticated) {
       setFiles([]);
       return;
@@ -35,7 +35,8 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
 
     setLoading(true);
     try {
-      const response = await apiService.getUploads(filters);
+      const filtersToUse = customFilters !== undefined ? customFilters : filters;
+      const response = await apiService.getUploads(filtersToUse);
       if (response.status === 'success' && response.data) {
         setFiles(response.data);
       } else {
@@ -65,23 +66,18 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   };
 
   const handleClearFilter = (key: keyof UploadFilters) => {
-    setFilters(prev => {
-      const newFilters = { ...prev };
-      delete newFilters[key];
-      return newFilters;
-    });
-    // Automatically trigger search after clearing
-    setTimeout(() => {
-      fetchFiles();
-    }, 100);
+    const newFilters = { ...filters };
+    delete newFilters[key];
+    setFilters(newFilters);
+    // Automatically trigger search with the new filters
+    fetchFiles(newFilters);
   };
 
   const handleClearAllFilters = () => {
-    setFilters({});
-    // Automatically trigger search after clearing all
-    setTimeout(() => {
-      fetchFiles();
-    }, 100);
+    const emptyFilters = {};
+    setFilters(emptyFilters);
+    // Automatically trigger search with empty filters
+    fetchFiles(emptyFilters);
   };
 
   const hasActiveFilters = () => {
