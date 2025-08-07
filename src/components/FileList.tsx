@@ -22,7 +22,17 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   const { isAuthenticated } = useAuth();
   const [files, setFiles] = useState<FileUpload[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState<UploadFilters>({});
+  
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+  
+  const [filters, setFilters] = useState<UploadFilters>({
+    from_date: getTodayDate(),
+    to_date: getTodayDate(),
+  });
   const [shareUserId, setShareUserId] = useState('');
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
