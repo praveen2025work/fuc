@@ -7,7 +7,8 @@ import FileList from "@/components/FileList";
 import HealthCheck from "@/components/HealthCheck";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Activity } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Activity, AlertTriangle } from "lucide-react";
 
 export default function Home() {
   const { isAuthenticated, isLoading, error } = useAuth();
@@ -42,38 +43,7 @@ export default function Home() {
     );
   }
 
-  if (error) {
-    return (
-      <>
-        <Head>
-          <title>File Upload Center - Authentication Error</title>
-          <meta name="description" content="Secure file upload and management system" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center space-y-4 max-w-md mx-auto p-6"
-          >
-            <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-2xl">⚠️</span>
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">Authentication Failed</h2>
-            <p className="text-muted-foreground">{error}</p>
-            <Button onClick={() => window.location.reload()} variant="outline">
-              Retry
-            </Button>
-          </motion.div>
-        </div>
-      </>
-    );
-  }
 
-  if (!isAuthenticated) {
-    return null; // This shouldn't happen with the new auth flow, but just in case
-  }
 
   return (
     <>
@@ -95,6 +65,30 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
+            {/* Authentication Error Banner */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="flex items-center justify-between">
+                    <span>{error}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => window.location.reload()}
+                      className="ml-4"
+                    >
+                      Retry
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+
             {/* Health Check Toggle */}
             <div className="flex justify-end">
               <Button

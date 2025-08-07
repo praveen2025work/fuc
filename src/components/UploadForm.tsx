@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { apiService } from '@/services/api';
 import { API_CONFIG } from '@/config/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { Upload, File, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,6 +16,7 @@ interface UploadFormProps {
 }
 
 const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
+  const { isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileLocation, setFileLocation] = useState(API_CONFIG.defaultFileLocation);
   const [isUploading, setIsUploading] = useState(false);
@@ -42,6 +44,10 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAuthenticated) {
+      toast.error('Please authenticate to upload files');
+      return;
+    }
     const file = e.target.files?.[0];
     if (file) {
       handleFileSelect(file);
@@ -50,7 +56,9 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setDragOver(true);
+    if (isAuthenticated) {
+      setDragOver(true);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -61,6 +69,10 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
+    if (!isAuthenticated) {
+      toast.error('Please authenticate to upload files');
+      return;
+    }
     const file = e.dataTransfer.files[0];
     if (file) {
       handleFileSelect(file);
@@ -130,13 +142,23 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Authentication Warning */}
+          {!isAuthenticated && (
+            <div className="p-4 bg-muted/50 border border-muted rounded-lg">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm">Authentication required to upload files</span>
+              </div>
+            </div>
+          )}
+
           {/* File Drop Zone */}
           <div
-            className={`file-upload-area ${dragOver ? 'dragover' : ''} cursor-pointer`}
+            className={`file-upload-area ${dragOver ? 'dragover' : ''} ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => isAuthenticated && fileInputRef.current?.click()}
           >
             <input
               ref={fileInputRef}
@@ -187,6 +209,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
               value={fileLocation}
               onChange={(e) => setFileLocation(e.target.value)}
               placeholder="Enter file location path"
+              disabled={!isAuthenticated}
               className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -209,7 +232,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
           {/* Upload Button */}
           <Button
             onClick={handleUpload}
-            disabled={!selectedFile || !fileLocation.trim() || isUploading}
+            disabled={!isAuthenticated || !selectedFile || !fileLocation.trim() || isUploading}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 transform hover:scale-[1.02]"
           >
             {isUploading ? (

@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/services/api';
 import { FileUpload, UploadFilters } from '@/types/api';
-import { Files, Download, Share2, Search, Calendar, RefreshCw, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Files, Download, Share2, Search, Calendar, RefreshCw, User, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -18,6 +19,7 @@ interface FileListProps {
 }
 
 const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
+  const { isAuthenticated } = useAuth();
   const [files, setFiles] = useState<FileUpload[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<UploadFilters>({});
@@ -26,6 +28,11 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
 
   const fetchFiles = async () => {
+    if (!isAuthenticated) {
+      setFiles([]);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await apiService.getUploads(filters);
@@ -44,7 +51,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
 
   useEffect(() => {
     fetchFiles();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, isAuthenticated]);
 
   const handleFilterChange = (key: keyof UploadFilters, value: string) => {
     setFilters(prev => ({
@@ -132,8 +139,18 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Authentication Warning */}
+          {!isAuthenticated && (
+            <div className="p-4 bg-muted/50 border border-muted rounded-lg">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm">Authentication required to view and manage files</span>
+              </div>
+            </div>
+          )}
+
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${!isAuthenticated ? 'opacity-50' : ''}`}>
             <div className="space-y-2">
               <Label htmlFor="fromDate">From Date</Label>
               <Input
@@ -141,6 +158,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                 type="date"
                 value={filters.from_date || ''}
                 onChange={(e) => handleFilterChange('from_date', e.target.value)}
+                disabled={!isAuthenticated}
                 className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -151,6 +169,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                 type="date"
                 value={filters.to_date || ''}
                 onChange={(e) => handleFilterChange('to_date', e.target.value)}
+                disabled={!isAuthenticated}
                 className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -162,6 +181,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                 placeholder="Search files..."
                 value={filters.search || ''}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
+                disabled={!isAuthenticated}
                 className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -169,7 +189,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
               <Label>&nbsp;</Label>
               <Button
                 onClick={handleSearch}
-                disabled={loading}
+                disabled={!isAuthenticated || loading}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {loading ? (

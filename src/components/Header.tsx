@@ -32,34 +32,40 @@ const Header: React.FC = () => {
         </div>
 
         {/* User Info and Logout */}
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-4"
-          >
-            <div className="hidden sm:block">
-              <UserProfile />
-            </div>
-            
-            <div className="sm:hidden">
-              <Badge variant="secondary" className="text-xs">
-                {user.displayName}
-              </Badge>
-            </div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-4"
+        >
+          {user ? (
+            <>
+              <div className="hidden sm:block">
+                <UserProfile />
+              </div>
+              
+              <div className="sm:hidden">
+                <Badge variant="secondary" className="text-xs">
+                  {user.displayName}
+                </Badge>
+              </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="hover:bg-destructive hover:text-destructive-foreground transition-colors"
-            >
-              <LogOut className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </motion.div>
-        )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              >
+                <LogOut className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </>
+          ) : (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              Not Authenticated
+            </Badge>
+          )}
+        </motion.div>
       </div>
     </motion.header>
   );
