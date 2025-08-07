@@ -135,16 +135,10 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       transition={{ duration: 0.5 }}
     >
       <Card className="border-0 bg-card/50 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Upload className="w-5 h-5" />
-            Upload File
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="p-4">
           {/* Authentication Warning */}
           {!isAuthenticated && (
-            <div className="p-4 bg-muted/50 border border-muted rounded-lg">
+            <div className="mb-3 p-2 bg-muted/50 border border-muted rounded-md">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <AlertCircle className="w-4 h-4" />
                 <span className="text-sm">Authentication required to upload files</span>
@@ -152,101 +146,106 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
             </div>
           )}
 
-          {/* File Drop Zone */}
-          <div
-            className={`file-upload-area ${dragOver ? 'dragover' : ''} ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => isAuthenticated && fileInputRef.current?.click()}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={API_CONFIG.allowedFileTypes.join(',')}
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-            
-            {selectedFile ? (
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex items-center gap-3"
-              >
-                <div className="p-3 bg-primary/10 rounded-full">
-                  <File className="w-6 h-6 text-primary" />
+          {/* Compact Upload Row */}
+          <div className="flex gap-3 items-start">
+            {/* File Drop Zone - Compact */}
+            <div
+              className={`flex-1 min-h-[80px] border-2 border-dashed rounded-lg p-3 transition-all duration-200 ${
+                dragOver 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-muted-foreground/25 hover:border-primary/50'
+              } ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => isAuthenticated && fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={API_CONFIG.allowedFileTypes.join(',')}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              
+              {selectedFile ? (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="flex items-center gap-2"
+                >
+                  <div className="p-2 bg-primary/10 rounded">
+                    <File className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-foreground truncate">{selectedFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatFileSize(selectedFile.size)}
+                    </p>
+                  </div>
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                </motion.div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">
+                      Drop file or click to browse
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {API_CONFIG.allowedFileTypes.join(', ')} (max {API_CONFIG.maxFileSize / (1024 * 1024)}MB)
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="font-medium text-foreground">{selectedFile.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatFileSize(selectedFile.size)}
-                  </p>
+              )}
+            </div>
+
+            {/* File Location Input - Compact */}
+            <div className="w-64">
+              <Input
+                type="text"
+                value={fileLocation}
+                onChange={(e) => setFileLocation(e.target.value)}
+                placeholder="File location path"
+                disabled={!isAuthenticated}
+                className="h-[80px] text-sm"
+              />
+            </div>
+
+            {/* Upload Button - Compact */}
+            <Button
+              onClick={handleUpload}
+              disabled={!isAuthenticated || !selectedFile || !fileLocation.trim() || isUploading}
+              className="h-[80px] px-6 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isUploading ? (
+                <div className="flex flex-col items-center gap-1">
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <span className="text-xs">Uploading...</span>
                 </div>
-                <CheckCircle className="w-5 h-5 text-green-500 ml-auto" />
-              </motion.div>
-            ) : (
-              <div className="space-y-2">
-                <Upload className="w-12 h-12 text-muted-foreground mx-auto" />
-                <div>
-                  <p className="text-lg font-medium text-foreground">
-                    Drop your file here or click to browse
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Supports: {API_CONFIG.allowedFileTypes.join(', ')} (max {API_CONFIG.maxFileSize / (1024 * 1024)}MB)
-                  </p>
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <Upload className="w-4 h-4" />
+                  <span className="text-xs">Upload</span>
                 </div>
-              </div>
-            )}
+              )}
+            </Button>
           </div>
 
-          {/* File Location Input */}
-          <div className="space-y-2">
-            <Label htmlFor="fileLocation">File Location</Label>
-            <Input
-              id="fileLocation"
-              type="text"
-              value={fileLocation}
-              onChange={(e) => setFileLocation(e.target.value)}
-              placeholder="Enter file location path"
-              disabled={!isAuthenticated}
-              className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          {/* Upload Progress */}
+          {/* Upload Progress - Only when uploading */}
           {isUploading && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="space-y-2"
+              className="mt-3 space-y-1"
             >
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs">
                 <span>Uploading...</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <Progress value={uploadProgress} className="h-2" />
+              <Progress value={uploadProgress} className="h-1" />
             </motion.div>
           )}
-
-          {/* Upload Button */}
-          <Button
-            onClick={handleUpload}
-            disabled={!isAuthenticated || !selectedFile || !fileLocation.trim() || isUploading}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 transform hover:scale-[1.02]"
-          >
-            {isUploading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload File
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
     </motion.div>
