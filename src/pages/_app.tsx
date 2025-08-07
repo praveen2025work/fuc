@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import '../styles/globals.css';
-import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -25,9 +26,17 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <div className="min-h-screen">
-      <Component {...pageProps} />
-      <Toaster />
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen">
+        <Component {...pageProps} />
+        <Toaster 
+          position="top-right"
+          richColors
+          closeButton
+          expand={false}
+          visibleToasts={5}
+        />
+      </div>
+    </AuthProvider>
   )
 }
