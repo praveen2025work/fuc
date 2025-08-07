@@ -1,274 +1,334 @@
-# File Upload Center UI
+# File Upload Center
 
-A beautiful, modern React-based web application for secure file upload and management. Built with Next.js, TypeScript, and Tailwind CSS, featuring enterprise-grade security and seamless user experience.
+A comprehensive File Upload Center UI built with Next.js, TypeScript, Tailwind CSS, Radix UI, and Framer Motion, designed to interact with a File Upload Center API using Windows Authentication.
 
 ## Features
 
-- 🔐 **Secure Authentication**: External authentication simulation with user management
-- 📁 **File Upload**: Drag-and-drop file upload with progress tracking
-- 📋 **File Management**: List, search, filter, and download files
-- 🤝 **File Sharing**: Share files with other users
-- 🏥 **Health Monitoring**: Server health check and status monitoring
-- 🎨 **Beautiful UI**: Modern design with smooth animations using Framer Motion
-- 📱 **Responsive**: Works perfectly on desktop, tablet, and mobile devices
-- 🌙 **Theme Support**: Light and dark mode support
+- **Windows Authentication**: Automatic authentication using Windows credentials
+- **File Upload**: Drag-and-drop file upload with progress tracking
+- **File Management**: List, filter, download, and share uploaded files
+- **User Profile**: Detailed user information with photo support
+- **Multi-Environment Support**: Local, Development, UAT, and Production configurations
+- **IIS Deployment**: Ready for deployment on IIS servers
+- **Responsive Design**: Mobile-friendly interface with smooth animations
 
-## Tech Stack
-
-- **Framework**: Next.js 14 with TypeScript
-- **Styling**: Tailwind CSS with custom design system
-- **UI Components**: Radix UI primitives with shadcn/ui
-- **Animations**: Framer Motion
-- **HTTP Client**: Axios
-- **State Management**: React Context API
-- **Notifications**: Sonner toast notifications
-- **Date Handling**: date-fns
-
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Node.js 20.x or higher
-- npm, yarn, or pnpm package manager
-- File Upload Center API running on `http://localhost:3000`
+- npm or pnpm package manager
+- IIS (for production deployment)
 
-### Installation
+## Environment Configuration
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd file-upload-center-ui
-   ```
+The application supports multiple environments with separate configuration files:
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   ```
+### Environment Files
 
-3. **Configure environment variables**
-   
-   The `.env.local` file is already configured with default values:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:3000
-   NODE_ENV=development
-   ```
-   
-   Update `NEXT_PUBLIC_API_URL` if your API runs on a different URL.
+- `.env.local` - Local development
+- `.env.dev` - Development environment
+- `.env.uat` - UAT environment
+- `.env.prod` - Production environment
 
-4. **Start the development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   ```
+### Environment Variables
 
-5. **Open your browser**
-   
-   Navigate to `http://localhost:3001` to access the application.
+Each environment file contains the following variables:
 
-## API Integration
+```env
+NEXT_PUBLIC_ENV=<environment>
+NEXT_PUBLIC_USER_API_URL=<user-api-url>
+NEXT_PUBLIC_API_URL=<backend-api-url>
+NEXT_PUBLIC_USER_PHOTO_URL=<user-photo-api-url>
+```
 
-The application integrates with the File Upload Center API with the following endpoints:
+#### Example Configuration
 
-- `GET /api/health` - Server health check
-- `POST /api/upload` - Upload files
-- `GET /api/uploads` - List user files
-- `POST /api/share/{id}` - Share files
-- `GET /api/download/{id}` - Download files
+**Local Development (.env.local)**
+```env
+NEXT_PUBLIC_ENV=local
+NEXT_PUBLIC_USER_API_URL=http://localhost:9521
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_USER_PHOTO_URL=http://localhost:9521
+```
 
-### Authentication
+**Production (.env.prod)**
+```env
+NEXT_PUBLIC_ENV=prod
+NEXT_PUBLIC_USER_API_URL=http://ldndsm:9521
+NEXT_PUBLIC_API_URL=http://prod-api:3000
+NEXT_PUBLIC_USER_PHOTO_URL=http://ldndsm:9521
+```
 
-The application uses simulated external authentication. Users need to provide:
-- **User ID**: Unique identifier
-- **Display Name**: Full name for display
-- **Employee ID**: Employee identifier
+## Installation
 
-All API requests include the `X-User-Id` header for authentication.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd file-upload-center
+```
 
-### CORS Configuration
-
-Ensure your API allows requests from `http://localhost:3001`. The API should include this origin in its `ALLOWED_ORIGINS` configuration.
-
-## File Upload Specifications
-
-- **Supported formats**: `.png`, `.jpg`, `.jpeg`, `.pdf`
-- **Maximum file size**: 100MB
-- **Default location**: `C:\shared_dev` (configurable)
-- **Upload method**: Multipart form data with drag-and-drop support
-
-## Usage Guide
-
-### 1. Authentication
-- Enter your User ID, Display Name, and Employee ID
-- Click "Sign In" to access the application
-
-### 2. Upload Files
-- Navigate to the "Upload" tab
-- Drag and drop files or click to browse
-- Specify the file location path
-- Click "Upload File" to start the upload
-
-### 3. Manage Files
-- Navigate to the "Files" tab
-- Use filters to search by date range or filename
-- Download files by clicking the download button
-- Share files by clicking the share button and entering a user ID
-
-### 4. Monitor Health
-- Navigate to the "Health" tab
-- Click "Check Server Status" to verify API connectivity
-- View server status, debug mode, and configuration details
+2. Install dependencies:
+```bash
+npm install
+# or
+pnpm install
+```
 
 ## Development
 
-### Project Structure
+### Running Locally
 
-```
-src/
-├── components/          # React components
-│   ├── ui/             # shadcn/ui components
-│   ├── AuthForm.tsx    # Authentication form
-│   ├── UploadForm.tsx  # File upload component
-│   ├── FileList.tsx    # File management table
-│   ├── HealthCheck.tsx # Server health monitoring
-│   └── Header.tsx      # Application header
-├── contexts/           # React contexts
-│   └── AuthContext.tsx # Authentication state management
-├── services/           # API services
-│   └── api.ts          # API client and methods
-├── types/              # TypeScript type definitions
-│   └── api.ts          # API response types
-├── config/             # Configuration files
-│   └── api.ts          # API configuration
-├── pages/              # Next.js pages
-│   ├── _app.tsx        # App wrapper with providers
-│   └── index.tsx       # Main application page
-└── styles/             # Global styles
-    └── globals.css     # Tailwind CSS and custom styles
-```
+Choose the appropriate environment and run:
 
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-### Customization
-
-#### API Configuration
-Update `src/config/api.ts` to modify:
-- API base URL
-- Endpoint paths
-- File type restrictions
-- File size limits
-- Default file location
-
-#### Styling
-The application uses a custom design system based on the primary color `#2a73b2`. Modify `src/styles/globals.css` to customize:
-- Color scheme
-- Border radius
-- Typography
-- Component styles
-
-#### Components
-All components are built with TypeScript and follow React best practices:
-- Functional components with hooks
-- Proper error handling
-- Loading states
-- Responsive design
-- Accessibility features
-
-## Deployment
-
-### Development Deployment
-The application is configured to run on `http://localhost:3001` to match CORS settings.
-
-### Production Deployment
-1. Build the application:
-   ```bash
-   npm run build
-   ```
-
-2. Start the production server:
-   ```bash
-   npm run start
-   ```
-
-### Docker Deployment
-Create a `Dockerfile`:
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 3001
-CMD ["npm", "start"]
-```
-
-Build and run:
 ```bash
-docker build -t file-upload-center-ui .
-docker run -p 3001:3001 file-upload-center-ui
+# Local environment
+npm run dev:local
+
+# Development environment
+npm run dev:dev
+
+# UAT environment
+npm run dev:uat
+
+# Production environment
+npm run dev:prod
 ```
+
+The application will be available at `http://localhost:3001`
+
+### Building for Different Environments
+
+```bash
+# Build for local
+npm run build:local
+
+# Build for development
+npm run build:dev
+
+# Build for UAT
+npm run build:uat
+
+# Build for production
+npm run build:prod
+
+# Build static files for IIS deployment
+npm run build:static
+```
+
+## IIS Deployment
+
+### Prerequisites for IIS
+
+1. **IIS with URL Rewrite Module**: Install the URL Rewrite module from Microsoft
+2. **Node.js**: Install Node.js on the IIS server
+3. **iisnode**: Install iisnode for running Node.js applications on IIS
+
+### Deployment Steps
+
+#### Option 1: Static Export (Recommended for IIS)
+
+1. **Build static files**:
+```bash
+npm run build:static
+```
+
+2. **Copy files to IIS**:
+   - Copy the entire `out` folder contents to your IIS website directory
+   - Example: `C:\inetpub\wwwroot\file-upload-center\`
+
+3. **Configure IIS**:
+   - Create a new website or virtual directory in IIS Manager
+   - Point the physical path to your deployment folder
+   - Ensure the application pool is set to "No Managed Code"
+
+4. **Create web.config** (if not exists):
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="React Routes" stopProcessing="true">
+          <match url=".*" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+          </conditions>
+          <action type="Rewrite" url="/" />
+        </rule>
+      </rules>
+    </rewrite>
+    <staticContent>
+      <mimeMap fileExtension=".json" mimeType="application/json" />
+      <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+      <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+    </staticContent>
+    <httpErrors errorMode="Custom" defaultResponseMode="File">
+      <remove statusCode="404" />
+      <error statusCode="404" path="/index.html" responseMode="File" />
+    </httpErrors>
+  </system.webServer>
+</configuration>
+```
+
+#### Option 2: Node.js Application on IIS
+
+1. **Build the application**:
+```bash
+npm run build:prod
+```
+
+2. **Copy files to IIS**:
+   - Copy all project files to your IIS directory
+   - Install dependencies on the server: `npm install --production`
+
+3. **Create web.config**:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
+    </handlers>
+    <rewrite>
+      <rules>
+        <rule name="DynamicContent">
+          <match url="/*" />
+          <action type="Rewrite" url="server.js"/>
+        </rule>
+      </rules>
+    </rewrite>
+    <iisnode node_env="production" />
+  </system.webServer>
+</configuration>
+```
+
+4. **Create server.js**:
+```javascript
+const { createServer } = require('http')
+const { parse } = require('url')
+const next = require('next')
+
+const dev = process.env.NODE_ENV !== 'production'
+const hostname = 'localhost'
+const port = process.env.PORT || 3000
+
+const app = next({ dev, hostname, port })
+const handle = app.getRequestHandler()
+
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
+      const parsedUrl = parse(req.url, true)
+      await handle(req, res, parsedUrl)
+    } catch (err) {
+      console.error('Error occurred handling', req.url, err)
+      res.statusCode = 500
+      res.end('internal server error')
+    }
+  }).listen(port, (err) => {
+    if (err) throw err
+    console.log(`> Ready on http://${hostname}:${port}`)
+  })
+})
+```
+
+### IIS Configuration Notes
+
+1. **Windows Authentication**: Ensure Windows Authentication is enabled in IIS for the application
+2. **CORS**: Configure CORS settings if the APIs are on different domains
+3. **SSL**: Configure SSL certificates for HTTPS in production
+4. **Permissions**: Ensure IIS_IUSRS has appropriate permissions on the application folder
+
+## API Integration
+
+The application integrates with three main API endpoints:
+
+### 1. User API
+- **Endpoint**: `{NEXT_PUBLIC_USER_API_URL}/api/user`
+- **Method**: GET
+- **Authentication**: Windows Authentication
+- **Purpose**: Retrieve current user information
+
+### 2. Backend API
+- **Base URL**: `{NEXT_PUBLIC_API_URL}`
+- **Endpoints**:
+  - `/api/health` - Health check
+  - `/api/upload` - File upload
+  - `/api/uploads` - List files
+  - `/api/download/{id}` - Download file
+  - `/api/share/{id}` - Share file
+- **Authentication**: X-User-Id header
+
+### 3. User Photo API
+- **Endpoint**: `{NEXT_PUBLIC_USER_PHOTO_URL}/api/user/photo/{username}`
+- **Method**: GET
+- **Authentication**: Windows Authentication
+- **Purpose**: Retrieve user profile photos
+
+## User Interface Features
+
+### User Profile Hover Card
+- Click on the user name in the header to view detailed user information
+- Displays user photo, contact details, department, and location
+- Automatically fetches user photo from the photo API
+- Falls back to generated avatar if photo is not available
+
+### File Management
+- Drag-and-drop file upload
+- File filtering by date range and search
+- Download and share functionality
+- Real-time upload progress
+
+### Health Monitoring
+- Toggleable health status display
+- API connectivity monitoring
+- Environment information display
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **CORS Errors**
-   - Ensure the API allows `http://localhost:3001` in ALLOWED_ORIGINS
-   - Check that the API is running on the correct port
+1. **Authentication Failures**:
+   - Ensure Windows Authentication is enabled in IIS
+   - Check that the user API endpoint is accessible
+   - Verify CORS settings
 
-2. **Authentication Issues**
-   - Verify the `X-User-Id` header is being sent
-   - Check that user data is stored in localStorage
+2. **File Upload Issues**:
+   - Check file size limits (default: 100MB)
+   - Verify allowed file types configuration
+   - Ensure backend API is accessible
 
-3. **File Upload Failures**
-   - Verify file type and size restrictions
-   - Check API endpoint availability
-   - Ensure proper form data formatting
+3. **Static Export Issues**:
+   - Use `npm run build:static` for IIS deployment
+   - Ensure all images are properly optimized
+   - Check that all API calls use absolute URLs
 
-4. **API Connection Issues**
-   - Verify `NEXT_PUBLIC_API_URL` in `.env.local`
-   - Check API server status
-   - Review network connectivity
+### Logs and Debugging
 
-### Debug Mode
-Enable debug logging by checking the browser console for:
-- API request/response logs
-- Authentication state changes
-- File upload progress
-- Error messages
+- Check browser console for client-side errors
+- Monitor IIS logs for server-side issues
+- Use the health check endpoint to verify API connectivity
 
-## Contributing
+## Development Guidelines
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Code Structure
+```
+src/
+├── components/          # React components
+├── config/             # Configuration files
+├── contexts/           # React contexts
+├── pages/              # Next.js pages
+├── services/           # API services
+├── styles/             # CSS styles
+└── types/              # TypeScript types
+```
+
+### Adding New Environments
+
+1. Create a new `.env.{environment}` file
+2. Add corresponding npm scripts in `package.json`
+3. Update deployment documentation
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-For support and questions:
-- Check the troubleshooting section
-- Review API documentation
-- Check browser console for errors
-- Verify API server status
-
----
-
-Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
+This project is proprietary and confidential.

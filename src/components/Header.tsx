@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { FileText, User, LogOut } from 'lucide-react';
+import { FileText, LogOut } from 'lucide-react';
+import UserProfile from '@/components/UserProfile';
 
 const Header: React.FC = () => {
   const router = useRouter();
@@ -38,16 +39,8 @@ const Header: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="flex items-center gap-4"
           >
-            <div className="text-right hidden sm:block">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-foreground">{user.displayName}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>ID: {user.userName}</span>
-                <span>•</span>
-                <span>Emp: {user.employeeId}</span>
-              </div>
+            <div className="hidden sm:block">
+              <UserProfile />
             </div>
             
             <div className="sm:hidden">

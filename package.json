@@ -7,8 +7,22 @@
   },
   "scripts": {
     "dev": "next dev -p 3001",
+    "dev:local": "cp .env.local .env && next dev -p 3001",
+    "dev:dev": "cp .env.dev .env && next dev -p 3001",
+    "dev:uat": "cp .env.uat .env && next dev -p 3001",
+    "dev:prod": "cp .env.prod .env && next dev -p 3001",
     "build": "next build",
+    "build:local": "cp .env.local .env && next build",
+    "build:dev": "cp .env.dev .env && next build",
+    "build:uat": "cp .env.uat .env && next build",
+    "build:prod": "cp .env.prod .env && next build",
+    "build:static": "cp .env.prod .env && BUILD_MODE=static next build",
+    "export": "BUILD_MODE=static next build && next export",
     "start": "next start -p 3001",
+    "start:local": "cp .env.local .env && next start -p 3001",
+    "start:dev": "cp .env.dev .env && next start -p 3001",
+    "start:uat": "cp .env.uat .env && next start -p 3001",
+    "start:prod": "cp .env.prod .env && next start -p 3001",
     "lint": "next lint"
   },
   "dependencies": {

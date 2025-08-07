@@ -22,6 +22,13 @@ const userApi = axios.create({
   withCredentials: true, // For Windows authentication
 });
 
+// Create separate instance for user photo API
+const userPhotoApi = axios.create({
+  baseURL: API_CONFIG.userPhotoURL,
+  timeout: 10000,
+  withCredentials: true, // For Windows authentication
+});
+
 // Add request interceptor to include X-User-Id header
 api.interceptors.request.use((config) => {
   const userData = localStorage.getItem('fileUploadUser');
@@ -53,6 +60,22 @@ export const apiService = {
       API_CONFIG.endpoints.user
     );
     return response.data;
+  },
+
+  // Get user photo
+  async getUserPhoto(userName: string): Promise<string> {
+    try {
+      const response: AxiosResponse<Blob> = await userPhotoApi.get(
+        `${API_CONFIG.endpoints.userPhoto}/${userName}`,
+        {
+          responseType: 'blob',
+        }
+      );
+      return URL.createObjectURL(response.data);
+    } catch (error) {
+      // Return a default avatar if photo not found
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=2a73b2&color=fff&size=128`;
+    }
   },
 
   // Health check
