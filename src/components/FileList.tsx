@@ -66,7 +66,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
 
   const handleDownload = async (file: FileUpload) => {
     try {
-      const blob = await apiService.downloadFile(file.id);
+      const blob = await apiService.downloadFile(file.filename);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

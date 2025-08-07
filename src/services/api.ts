@@ -109,9 +109,9 @@ export const apiService = {
   },
 
   // Download file
-  async downloadFile(uploadId: number): Promise<Blob> {
+  async downloadFile(filename: string): Promise<Blob> {
     const response: AxiosResponse<Blob> = await api.get(
-      `${API_CONFIG.endpoints.download}/${uploadId}`,
+      `${API_CONFIG.endpoints.download}/${encodeURIComponent(filename)}`,
       {
         responseType: 'blob',
       }
