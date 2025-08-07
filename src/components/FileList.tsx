@@ -70,10 +70,18 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
       delete newFilters[key];
       return newFilters;
     });
+    // Automatically trigger search after clearing
+    setTimeout(() => {
+      fetchFiles();
+    }, 100);
   };
 
   const handleClearAllFilters = () => {
     setFilters({});
+    // Automatically trigger search after clearing all
+    setTimeout(() => {
+      fetchFiles();
+    }, 100);
   };
 
   const hasActiveFilters = () => {
@@ -165,110 +173,116 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
             </div>
           )}
 
-          {/* Filters */}
-          <div className={`space-y-4 ${!isAuthenticated ? 'opacity-50' : ''}`}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="fromDate">From Date</Label>
+          {/* Filters - Single Row Layout */}
+          <div className={`${!isAuthenticated ? 'opacity-50' : ''}`}>
+            <div className="flex flex-wrap items-end gap-3">
+              {/* From Date */}
+              <div className="flex flex-col min-w-0">
+                <Label htmlFor="fromDate" className="text-xs mb-1 text-muted-foreground">From Date</Label>
+                <div className="relative">
+                  <Input
+                    id="fromDate"
+                    type="date"
+                    value={filters.from_date || ''}
+                    onChange={(e) => handleFilterChange('from_date', e.target.value)}
+                    disabled={!isAuthenticated}
+                    className="w-36 h-9 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  />
                   {filters.from_date && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleClearFilter('from_date')}
                       disabled={!isAuthenticated}
-                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                      className="absolute -right-1 -top-1 h-5 w-5 p-0 text-muted-foreground hover:text-foreground bg-background border border-border rounded-full"
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
-                <Input
-                  id="fromDate"
-                  type="date"
-                  value={filters.from_date || ''}
-                  onChange={(e) => handleFilterChange('from_date', e.target.value)}
-                  disabled={!isAuthenticated}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="toDate">To Date</Label>
+
+              {/* To Date */}
+              <div className="flex flex-col min-w-0">
+                <Label htmlFor="toDate" className="text-xs mb-1 text-muted-foreground">To Date</Label>
+                <div className="relative">
+                  <Input
+                    id="toDate"
+                    type="date"
+                    value={filters.to_date || ''}
+                    onChange={(e) => handleFilterChange('to_date', e.target.value)}
+                    disabled={!isAuthenticated}
+                    className="w-36 h-9 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  />
                   {filters.to_date && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleClearFilter('to_date')}
                       disabled={!isAuthenticated}
-                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                      className="absolute -right-1 -top-1 h-5 w-5 p-0 text-muted-foreground hover:text-foreground bg-background border border-border rounded-full"
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
-                <Input
-                  id="toDate"
-                  type="date"
-                  value={filters.to_date || ''}
-                  onChange={(e) => handleFilterChange('to_date', e.target.value)}
-                  disabled={!isAuthenticated}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="search">Search Filename</Label>
+
+              {/* Search Filename */}
+              <div className="flex flex-col flex-1 min-w-0">
+                <Label htmlFor="search" className="text-xs mb-1 text-muted-foreground">Search Filename</Label>
+                <div className="relative">
+                  <Input
+                    id="search"
+                    type="text"
+                    placeholder="Search files..."
+                    value={filters.search || ''}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    disabled={!isAuthenticated}
+                    className="h-9 text-sm pr-8 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  />
                   {filters.search && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleClearFilter('search')}
                       disabled={!isAuthenticated}
-                      className="h-auto p-1 text-muted-foreground hover:text-foreground"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
-                <Input
-                  id="search"
-                  type="text"
-                  placeholder="Search files..."
-                  value={filters.search || ''}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  disabled={!isAuthenticated}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                />
               </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-2 justify-end">
-              {hasActiveFilters() && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearAllFilters}
-                  disabled={!isAuthenticated}
-                  className="hover:bg-muted/50 transition-colors"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Clear All
-                </Button>
-              )}
-              <Button
-                onClick={handleSearch}
-                disabled={!isAuthenticated || loading}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                {loading ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4 mr-2" />
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 ml-auto">
+                {hasActiveFilters() && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearAllFilters}
+                    disabled={!isAuthenticated}
+                    className="h-9 hover:bg-muted/50 transition-colors"
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Clear All
+                  </Button>
                 )}
-                Search
-              </Button>
+                <Button
+                  onClick={handleSearch}
+                  disabled={!isAuthenticated || loading}
+                  size="sm"
+                  className="h-9 bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  {loading ? (
+                    <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4 mr-1" />
+                  )}
+                  Search
+                </Button>
+              </div>
             </div>
           </div>
 
