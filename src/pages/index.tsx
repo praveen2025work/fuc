@@ -4,16 +4,14 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import UploadForm from "@/components/UploadForm";
 import FileList from "@/components/FileList";
-import HealthCheck from "@/components/HealthCheck";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Activity, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export default function Home() {
   const { isAuthenticated, isLoading, error } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [showHealth, setShowHealth] = useState(false);
 
   const handleUploadSuccess = () => {
     // Trigger file list refresh
@@ -58,7 +56,7 @@ export default function Home() {
         <Header />
         
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,30 +87,7 @@ export default function Home() {
               </motion.div>
             )}
 
-            {/* Health Check Toggle */}
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowHealth(!showHealth)}
-                className="flex items-center gap-2"
-              >
-                <Activity className="w-4 h-4" />
-                {showHealth ? 'Hide' : 'Show'} Health Status
-              </Button>
-            </div>
 
-            {/* Health Check Section */}
-            {showHealth && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <HealthCheck />
-              </motion.div>
-            )}
 
             {/* Upload Form - Row on top */}
             <motion.div
