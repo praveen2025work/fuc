@@ -9,7 +9,7 @@ export const API_CONFIG = {
     uploads: '/uploads',
     download: '/download',
   },
-  allowedFileTypes: ['.png', '.jpg', '.jpeg', '.pdf'],
+  allowedFileTypes: ['*'], // Allow all file types
   maxFileSize: 100 * 1024 * 1024, // 100MB
   defaultFileLocation: 'C:\\shared_dev',
 };

@@ -25,10 +25,13 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): boolean => {
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-    if (!API_CONFIG.allowedFileTypes.includes(fileExtension)) {
-      toast.error(`Invalid file type. Allowed types: ${API_CONFIG.allowedFileTypes.join(', ')}`);
-      return false;
+    // Check file type only if not allowing all types
+    if (!API_CONFIG.allowedFileTypes.includes('*')) {
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!API_CONFIG.allowedFileTypes.includes(fileExtension)) {
+        toast.error(`Invalid file type. Allowed types: ${API_CONFIG.allowedFileTypes.join(', ')}`);
+        return false;
+      }
     }
     if (file.size > API_CONFIG.maxFileSize) {
       toast.error(`File size exceeds ${API_CONFIG.maxFileSize / (1024 * 1024)}MB limit`);
@@ -163,7 +166,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={API_CONFIG.allowedFileTypes.join(',')}
+                accept={API_CONFIG.allowedFileTypes.includes('*') ? '*' : API_CONFIG.allowedFileTypes.join(',')}
                 onChange={handleFileInputChange}
                 className="hidden"
               />
@@ -193,7 +196,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                       Drop file or click to browse
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {API_CONFIG.allowedFileTypes.join(', ')} (max {API_CONFIG.maxFileSize / (1024 * 1024)}MB)
+                      {API_CONFIG.allowedFileTypes.includes('*') ? 'All file types' : API_CONFIG.allowedFileTypes.join(', ')} (max {API_CONFIG.maxFileSize / (1024 * 1024)}MB)
                     </p>
                   </div>
                 </div>
