@@ -1,11 +1,9 @@
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   userApiURL: process.env.NEXT_PUBLIC_USER_API_URL || 'http://localhost:9521',
-  userPhotoURL: process.env.NEXT_PUBLIC_USER_PHOTO_URL || 'http://localhost:9521',
   environment: process.env.NEXT_PUBLIC_ENV || 'local',
   endpoints: {
     user: '/api/user',
-    userPhoto: '/api/user/photo',
     health: '/api/health',
     upload: '/api/upload',
     share: '/api/share',

@@ -114,26 +114,23 @@ export default function Home() {
               </motion.div>
             )}
 
-            {/* Upload and Files Section */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {/* Upload Form */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <UploadForm onUploadSuccess={handleUploadSuccess} />
-              </motion.div>
+            {/* Upload Form - Row on top */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <UploadForm onUploadSuccess={handleUploadSuccess} />
+            </motion.div>
 
-              {/* File List */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                <FileList refreshTrigger={refreshTrigger} />
-              </motion.div>
-            </div>
+            {/* File List - Below upload */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <FileList refreshTrigger={refreshTrigger} />
+            </motion.div>
           </motion.div>
         </main>
 

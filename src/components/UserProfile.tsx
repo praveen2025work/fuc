@@ -1,30 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Building, MapPin, Hash } from 'lucide-react';
+import { User, Mail, Building, Hash } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
 
 const UserProfile: React.FC = () => {
   const { user } = useAuth();
-  const [userPhoto, setUserPhoto] = useState<string>('');
-  const [isLoadingPhoto, setIsLoadingPhoto] = useState(false);
-
-  useEffect(() => {
-    if (user?.userName) {
-      setIsLoadingPhoto(true);
-      apiService.getUserPhoto(user.userName)
-        .then(setUserPhoto)
-        .catch(() => {
-          // Fallback to default avatar
-          setUserPhoto(`https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=2a73b2&color=fff&size=128`);
-        })
-        .finally(() => setIsLoadingPhoto(false));
-    }
-  }, [user]);
 
   if (!user) return null;
 
@@ -75,11 +59,6 @@ const UserProfile: React.FC = () => {
           {/* Header with Avatar and Name */}
           <div className="flex items-start gap-3">
             <Avatar className="w-16 h-16">
-              <AvatarImage 
-                src={userPhoto} 
-                alt={user.displayName}
-                className={isLoadingPhoto ? 'opacity-50' : ''}
-              />
               <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
                 {getInitials(user.displayName)}
               </AvatarFallback>
