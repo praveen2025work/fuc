@@ -14,9 +14,10 @@ import { toast } from 'sonner';
 
 interface UploadFormProps {
   onUploadSuccess?: () => void;
+  refreshTrigger?: number;
 }
 
-const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
+const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess, refreshTrigger }) => {
   const { isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
@@ -49,6 +50,13 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
       setSelectedLocation(null);
     }
   }, [selectedApplication]);
+
+  // Refresh applications when refreshTrigger changes
+  useEffect(() => {
+    if (isAuthenticated && refreshTrigger !== undefined) {
+      loadApplications();
+    }
+  }, [refreshTrigger, isAuthenticated]);
 
   const loadConfig = async () => {
     try {

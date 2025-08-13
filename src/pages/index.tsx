@@ -1,20 +1,32 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import UploadForm from "@/components/UploadForm";
 import FileList from "@/components/FileList";
+import { ApplicationManager } from "@/components/ApplicationManager";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Settings, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Home() {
   const { isAuthenticated, isLoading, error } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showApplicationManager, setShowApplicationManager] = useState(false);
 
   const handleUploadSuccess = () => {
     // Trigger file list refresh
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleApplicationCreated = () => {
+    // Trigger refresh for upload form dropdowns
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleLocationCreated = () => {
+    // Trigger refresh for upload form dropdowns
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -87,7 +99,45 @@ export default function Home() {
               </motion.div>
             )}
 
+            {/* Application Manager Toggle */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="flex justify-end"
+            >
+              <Button
+                variant="outline"
+                onClick={() => setShowApplicationManager(!showApplicationManager)}
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Manage Applications
+                {showApplicationManager ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </motion.div>
 
+            {/* Application Manager - Collapsible */}
+            <AnimatePresence>
+              {showApplicationManager && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <ApplicationManager
+                    onApplicationCreated={handleApplicationCreated}
+                    onLocationCreated={handleLocationCreated}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Upload Form - Row on top */}
             <motion.div
@@ -95,7 +145,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <UploadForm onUploadSuccess={handleUploadSuccess} />
+              <UploadForm onUploadSuccess={handleUploadSuccess} refreshTrigger={refreshTrigger} />
             </motion.div>
 
             {/* File List - Below upload */}
