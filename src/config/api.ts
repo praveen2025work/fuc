@@ -4,12 +4,15 @@ export const API_CONFIG = {
   environment: process.env.NEXT_PUBLIC_ENV || 'local',
   endpoints: {
     health: '/health',
+    config: '/config',
+    applications: '/applications',
+    applicationLocations: (applicationId: number) => `/applications/${applicationId}/locations`,
     upload: '/upload',
     share: '/share',
     uploads: '/uploads',
     download: '/download',
   },
-  allowedFileTypes: ['*'], // Allow all file types
+  allowedFileTypes: ['*'], // Allow all file types - will be overridden by config endpoint
   maxFileSize: 100 * 1024 * 1024, // 100MB
   defaultFileLocation: 'C:\\shared_dev',
 };

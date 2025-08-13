@@ -4,13 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/services/api';
-import { FileUpload, UploadFilters } from '@/types/api';
+import { FileUpload, UploadFilters, Application, Location } from '@/types/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { Files, Download, Share2, Search, Calendar, RefreshCw, User, AlertCircle, X } from 'lucide-react';
+import { Files, Download, Share2, Search, RefreshCw, User, AlertCircle, X, Building, Folder } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -22,6 +23,10 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   const { isAuthenticated } = useAuth();
   const [files, setFiles] = useState<FileUpload[]>([]);
   const [loading, setLoading] = useState(false);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [loadingLocations, setLoadingLocations] = useState(false);
   
   // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
@@ -36,6 +41,59 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
   const [shareUserId, setShareUserId] = useState('');
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
+
+  // Load applications on mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadApplications();
+    }
+  }, [isAuthenticated]);
+
+  // Load locations when application filter changes
+  useEffect(() => {
+    if (filters.application_id) {
+      loadLocations(filters.application_id);
+    } else {
+      setLocations([]);
+      // Clear location filter if application is cleared
+      if (filters.location_id) {
+        const newFilters = { ...filters };
+        delete newFilters.location_id;
+        setFilters(newFilters);
+      }
+    }
+  }, [filters.application_id]);
+
+  const loadApplications = async () => {
+    setLoadingApplications(true);
+    try {
+      const response = await apiService.getApplications();
+      if (response.status === 'success' && response.data) {
+        setApplications(response.data);
+      }
+    } catch (error: any) {
+      console.error('Failed to load applications:', error);
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
+  const loadLocations = async (applicationId: number) => {
+    setLoadingLocations(true);
+    try {
+      const response = await apiService.getApplicationLocations(applicationId);
+      if (response.status === 'success' && response.data) {
+        setLocations(response.data);
+      } else {
+        setLocations([]);
+      }
+    } catch (error: any) {
+      console.error('Failed to load locations:', error);
+      setLocations([]);
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
 
   const fetchFiles = async (customFilters?: UploadFilters) => {
     if (!isAuthenticated) {
@@ -64,7 +122,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
     fetchFiles();
   }, [refreshTrigger, isAuthenticated]);
 
-  const handleFilterChange = (key: keyof UploadFilters, value: string) => {
+  const handleFilterChange = (key: keyof UploadFilters, value: string | number) => {
     setFilters(prev => ({
       ...prev,
       [key]: value || undefined,
@@ -158,6 +216,16 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
     }
   };
 
+  const getApplicationName = (applicationId: number): string => {
+    const app = applications.find(a => a.id === applicationId);
+    return app ? app.name : `App ${applicationId}`;
+  };
+
+  const getLocationName = (locationId: number): string => {
+    const location = locations.find(l => l.id === locationId);
+    return location ? location.location_name : `Location ${locationId}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -228,6 +296,80 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleClearFilter('to_date')}
+                      disabled={!isAuthenticated}
+                      className="absolute -right-1 -top-1 h-5 w-5 p-0 text-muted-foreground hover:text-foreground bg-background border border-border rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Application Filter */}
+              <div className="flex flex-col min-w-0">
+                <Label className="text-xs mb-1 text-muted-foreground">Application</Label>
+                <div className="relative">
+                  <Select
+                    value={filters.application_id?.toString() || ''}
+                    onValueChange={(value) => handleFilterChange('application_id', parseInt(value))}
+                    disabled={!isAuthenticated || loadingApplications}
+                  >
+                    <SelectTrigger className="w-40 h-9 text-sm">
+                      <SelectValue placeholder={loadingApplications ? "Loading..." : "All apps"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {applications.map((app) => (
+                        <SelectItem key={app.id} value={app.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <Building className="w-3 h-3" />
+                            {app.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {filters.application_id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearFilter('application_id')}
+                      disabled={!isAuthenticated}
+                      className="absolute -right-1 -top-1 h-5 w-5 p-0 text-muted-foreground hover:text-foreground bg-background border border-border rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Location Filter */}
+              <div className="flex flex-col min-w-0">
+                <Label className="text-xs mb-1 text-muted-foreground">Location</Label>
+                <div className="relative">
+                  <Select
+                    value={filters.location_id?.toString() || ''}
+                    onValueChange={(value) => handleFilterChange('location_id', parseInt(value))}
+                    disabled={!isAuthenticated || !filters.application_id || loadingLocations}
+                  >
+                    <SelectTrigger className="w-40 h-9 text-sm">
+                      <SelectValue placeholder={loadingLocations ? "Loading..." : "All locations"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((location) => (
+                        <SelectItem key={location.id} value={location.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <Folder className="w-3 h-3" />
+                            {location.location_name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {filters.location_id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleClearFilter('location_id')}
                       disabled={!isAuthenticated}
                       className="absolute -right-1 -top-1 h-5 w-5 p-0 text-muted-foreground hover:text-foreground bg-background border border-border rounded-full"
                     >

@@ -24,6 +24,30 @@ export interface HealthData {
   debug_mode: boolean;
 }
 
+export interface ConfigData {
+  allowed_extensions: string[];
+}
+
+export interface Application {
+  id: number;
+  name: string;
+}
+
+export interface Location {
+  id: number;
+  location_name: string;
+  path: string;
+}
+
+export interface CreateApplicationRequest {
+  name: string;
+}
+
+export interface CreateLocationRequest {
+  location_name: string;
+  path: string;
+}
+
 export interface UploadData {
   upload_id: number;
   filename: string;
@@ -44,12 +68,15 @@ export interface FileUpload {
 
 export interface ShareRequest {
   shared_with: string;
+  send_email?: boolean;
 }
 
 export interface UploadFilters {
   from_date?: string;
   to_date?: string;
   search?: string;
+  application_id?: number;
+  location_id?: number;
 }
 
 export interface ApiError {

@@ -3,6 +3,11 @@ import { API_CONFIG } from '@/config/api';
 import { 
   ApiResponse, 
   HealthData, 
+  ConfigData,
+  Application,
+  Location,
+  CreateApplicationRequest,
+  CreateLocationRequest,
   UploadData, 
   FileUpload, 
   ShareRequest, 
@@ -53,7 +58,58 @@ export const apiService = {
     return response.data;
   },
 
+  // Get configuration
+  async getConfig(): Promise<ApiResponse<ConfigData>> {
+    const response: AxiosResponse<ApiResponse<ConfigData>> = await api.get(
+      API_CONFIG.endpoints.config
+    );
+    return response.data;
+  },
 
+  // Applications
+  async getApplications(): Promise<ApiResponse<Application[]>> {
+    const response: AxiosResponse<ApiResponse<Application[]>> = await api.get(
+      API_CONFIG.endpoints.applications
+    );
+    return response.data;
+  },
+
+  async createApplication(request: CreateApplicationRequest): Promise<ApiResponse<Application>> {
+    const response: AxiosResponse<ApiResponse<Application>> = await api.post(
+      API_CONFIG.endpoints.applications,
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  // Locations
+  async getApplicationLocations(applicationId: number): Promise<ApiResponse<Location[]>> {
+    const response: AxiosResponse<ApiResponse<Location[]>> = await api.get(
+      API_CONFIG.endpoints.applicationLocations(applicationId)
+    );
+    return response.data;
+  },
+
+  async createApplicationLocation(
+    applicationId: number, 
+    request: CreateLocationRequest
+  ): Promise<ApiResponse<Location>> {
+    const response: AxiosResponse<ApiResponse<Location>> = await api.post(
+      API_CONFIG.endpoints.applicationLocations(applicationId),
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  },
 
   // Health check
   async checkHealth(): Promise<ApiResponse<HealthData>> {
@@ -63,11 +119,20 @@ export const apiService = {
     return response.data;
   },
 
-  // Upload file
-  async uploadFile(file: File, fileLocation: string): Promise<ApiResponse<UploadData>> {
+  // Upload file (updated for application-based uploads)
+  async uploadFile(
+    file: File, 
+    applicationId: number, 
+    locationId: number, 
+    additionalPath?: string
+  ): Promise<ApiResponse<UploadData>> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('file_location', fileLocation);
+    formData.append('application_id', applicationId.toString());
+    formData.append('location_id', locationId.toString());
+    if (additionalPath) {
+      formData.append('additional_path', additionalPath);
+    }
 
     const response: AxiosResponse<ApiResponse<UploadData>> = await api.post(
       API_CONFIG.endpoints.upload,
@@ -81,12 +146,14 @@ export const apiService = {
     return response.data;
   },
 
-  // Get uploads
+  // Get uploads (updated with application and location filters)
   async getUploads(filters?: UploadFilters): Promise<ApiResponse<FileUpload[]>> {
     const params = new URLSearchParams();
     if (filters?.from_date) params.append('from_date', filters.from_date);
     if (filters?.to_date) params.append('to_date', filters.to_date);
     if (filters?.search) params.append('search', filters.search);
+    if (filters?.application_id) params.append('application_id', filters.application_id.toString());
+    if (filters?.location_id) params.append('location_id', filters.location_id.toString());
 
     const response: AxiosResponse<ApiResponse<FileUpload[]>> = await api.get(
       `${API_CONFIG.endpoints.uploads}?${params.toString()}`

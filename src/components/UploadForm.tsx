@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { apiService } from '@/services/api';
-import { API_CONFIG } from '@/config/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { Upload, File, CheckCircle, AlertCircle } from 'lucide-react';
+import { Application, Location, ConfigData } from '@/types/api';
+import { Upload, File, CheckCircle, AlertCircle, Folder, Building } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UploadFormProps {
@@ -18,23 +19,97 @@ interface UploadFormProps {
 const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
   const { isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileLocation, setFileLocation] = useState(API_CONFIG.defaultFileLocation);
+  const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<number | null>(null);
+  const [additionalPath, setAdditionalPath] = useState('');
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [config, setConfig] = useState<ConfigData | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [loadingLocations, setLoadingLocations] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load initial data
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadConfig();
+      loadApplications();
+    }
+  }, [isAuthenticated]);
+
+  // Load locations when application changes
+  useEffect(() => {
+    if (selectedApplication) {
+      loadLocations(selectedApplication);
+    } else {
+      setLocations([]);
+      setSelectedLocation(null);
+    }
+  }, [selectedApplication]);
+
+  const loadConfig = async () => {
+    try {
+      const response = await apiService.getConfig();
+      if (response.status === 'success' && response.data) {
+        setConfig(response.data);
+      }
+    } catch (error: any) {
+      console.error('Failed to load config:', error);
+      // Use default config if API fails
+      setConfig({ allowed_extensions: [] });
+    }
+  };
+
+  const loadApplications = async () => {
+    setLoadingApplications(true);
+    try {
+      const response = await apiService.getApplications();
+      if (response.status === 'success' && response.data) {
+        setApplications(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load applications');
+      }
+    } catch (error: any) {
+      console.error('Failed to load applications:', error);
+      toast.error('Failed to load applications');
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
+  const loadLocations = async (applicationId: number) => {
+    setLoadingLocations(true);
+    try {
+      const response = await apiService.getApplicationLocations(applicationId);
+      if (response.status === 'success' && response.data) {
+        setLocations(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load locations');
+      }
+    } catch (error: any) {
+      console.error('Failed to load locations:', error);
+      toast.error('Failed to load locations');
+      setLocations([]);
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
+
   const validateFile = (file: File): boolean => {
-    // Check file type only if not allowing all types
-    if (!API_CONFIG.allowedFileTypes.includes('*')) {
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-      if (!API_CONFIG.allowedFileTypes.includes(fileExtension)) {
-        toast.error(`Invalid file type. Allowed types: ${API_CONFIG.allowedFileTypes.join(', ')}`);
+    if (config && config.allowed_extensions.length > 0) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (fileExtension && !config.allowed_extensions.includes(fileExtension)) {
+        toast.error(`Invalid file type. Allowed types: ${config.allowed_extensions.join(', ')}`);
         return false;
       }
     }
-    if (file.size > API_CONFIG.maxFileSize) {
-      toast.error(`File size exceeds ${API_CONFIG.maxFileSize / (1024 * 1024)}MB limit`);
+    // Check file size (100MB limit)
+    const maxSize = 100 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(`File size exceeds 100MB limit`);
       return false;
     }
     return true;
@@ -83,8 +158,8 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !fileLocation.trim()) {
-      toast.error('Please select a file and specify a location');
+    if (!selectedFile || !selectedApplication || !selectedLocation) {
+      toast.error('Please select a file, application, and location');
       return;
     }
 
@@ -97,7 +172,12 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
         setUploadProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
-      const response = await apiService.uploadFile(selectedFile, fileLocation.trim());
+      const response = await apiService.uploadFile(
+        selectedFile, 
+        selectedApplication, 
+        selectedLocation, 
+        additionalPath.trim() || undefined
+      );
       
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -109,8 +189,12 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
             description: `Filename: ${response.data.filename}`,
           }
         );
+        // Reset form
         setSelectedFile(null);
-        setFileLocation(API_CONFIG.defaultFileLocation);
+        setSelectedApplication(null);
+        setSelectedLocation(null);
+        setAdditionalPath('');
+        setLocations([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -131,6 +215,20 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
     return (bytes / 1024).toFixed(1) + ' KB';
   };
 
+  const getAcceptedFileTypes = (): string => {
+    if (!config || config.allowed_extensions.length === 0) {
+      return '*';
+    }
+    return config.allowed_extensions.map(ext => `.${ext}`).join(',');
+  };
+
+  const getFileTypeText = (): string => {
+    if (!config || config.allowed_extensions.length === 0) {
+      return 'All file types';
+    }
+    return config.allowed_extensions.join(', ');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -149,9 +247,9 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
             </div>
           )}
 
-          {/* Compact Upload Row */}
+          {/* Upload Form Row */}
           <div className="flex gap-3 items-start">
-            {/* File Drop Zone - Compact */}
+            {/* File Drop Zone */}
             <div
               className={`flex-1 min-h-[80px] border-2 border-dashed rounded-lg p-3 transition-all duration-200 ${
                 dragOver 
@@ -166,7 +264,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={API_CONFIG.allowedFileTypes.includes('*') ? '*' : API_CONFIG.allowedFileTypes.join(',')}
+                accept={getAcceptedFileTypes()}
                 onChange={handleFileInputChange}
                 className="hidden"
               />
@@ -196,29 +294,81 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess }) => {
                       Drop file or click to browse
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {API_CONFIG.allowedFileTypes.includes('*') ? 'All file types' : API_CONFIG.allowedFileTypes.join(', ')} (max {API_CONFIG.maxFileSize / (1024 * 1024)}MB)
+                      {getFileTypeText()} (max 100MB)
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* File Location Input - Compact */}
-            <div className="w-64">
+            {/* Application Dropdown */}
+            <div className="w-48">
+              <Label className="text-xs text-muted-foreground mb-1 block">Application</Label>
+              <Select
+                value={selectedApplication?.toString() || ''}
+                onValueChange={(value) => setSelectedApplication(parseInt(value))}
+                disabled={!isAuthenticated || loadingApplications}
+              >
+                <SelectTrigger className="h-[60px]">
+                  <SelectValue placeholder={loadingApplications ? "Loading..." : "Select application"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {applications.map((app) => (
+                    <SelectItem key={app.id} value={app.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <Building className="w-4 h-4" />
+                        {app.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Location Dropdown */}
+            <div className="w-48">
+              <Label className="text-xs text-muted-foreground mb-1 block">Location</Label>
+              <Select
+                value={selectedLocation?.toString() || ''}
+                onValueChange={(value) => setSelectedLocation(parseInt(value))}
+                disabled={!isAuthenticated || !selectedApplication || loadingLocations}
+              >
+                <SelectTrigger className="h-[60px]">
+                  <SelectValue placeholder={loadingLocations ? "Loading..." : "Select location"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-4 h-4" />
+                        <div>
+                          <div className="font-medium">{location.location_name}</div>
+                          <div className="text-xs text-muted-foreground">{location.path}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Additional Path Input */}
+            <div className="w-40">
+              <Label className="text-xs text-muted-foreground mb-1 block">Additional Path</Label>
               <Input
                 type="text"
-                value={fileLocation}
-                onChange={(e) => setFileLocation(e.target.value)}
-                placeholder="File location path"
+                value={additionalPath}
+                onChange={(e) => setAdditionalPath(e.target.value)}
+                placeholder="Optional path"
                 disabled={!isAuthenticated}
-                className="h-[80px] text-sm"
+                className="h-[60px] text-sm"
               />
             </div>
 
-            {/* Upload Button - Compact */}
+            {/* Upload Button */}
             <Button
               onClick={handleUpload}
-              disabled={!isAuthenticated || !selectedFile || !fileLocation.trim() || isUploading}
+              disabled={!isAuthenticated || !selectedFile || !selectedApplication || !selectedLocation || isUploading}
               className="h-[80px] px-6 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isUploading ? (
