@@ -107,12 +107,12 @@ export default function Home() {
               className="flex justify-end"
             >
               <Button
-                variant="outline"
+                variant={showApplicationManager ? "default" : "outline"}
                 onClick={() => setShowApplicationManager(!showApplicationManager)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 shadow-sm"
               >
                 <Settings className="h-4 w-4" />
-                Manage Applications
+                Application Management
                 {showApplicationManager ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -125,10 +125,10 @@ export default function Home() {
             <AnimatePresence>
               {showApplicationManager && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, height: 0, y: -20 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -20 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
                   className="overflow-hidden"
                 >
                   <ApplicationManager
