@@ -31,12 +31,14 @@ export interface ConfigData {
 export interface Application {
   id: number;
   name: string;
+  updated_by: string;
 }
 
 export interface Location {
   id: number;
   location_name: string;
   path: string;
+  updated_by: string;
 }
 
 export interface CreateApplicationRequest {
@@ -64,6 +66,22 @@ export interface FileUpload {
   user_id: string;
   file_location: string;
   download_count: number;
+  application_id: number;
+  location_id: number;
+}
+
+export interface UserInfo {
+  id: number;
+  displayName: string;
+  username: string;
+  active: boolean | null;
+  createdBy: string | null;
+  action: string | null;
+  email: string;
+}
+
+export interface UserInfoResponse {
+  userConfigs: UserInfo[];
 }
 
 export interface ShareRequest {

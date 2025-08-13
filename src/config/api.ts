@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   userApiURL: process.env.NEXT_PUBLIC_USER_API_URL || 'http://localhost:9521',
   environment: process.env.NEXT_PUBLIC_ENV || 'local',
   endpoints: {
@@ -8,9 +8,10 @@ export const API_CONFIG = {
     applications: '/applications',
     applicationLocations: (applicationId: number) => `/applications/${applicationId}/locations`,
     upload: '/upload',
-    share: '/share',
+    share: (uploadId: number) => `/share/${uploadId}`,
     uploads: '/uploads',
-    download: '/download',
+    download: (filename: string) => `/download/${encodeURIComponent(filename)}`,
+    userinfo: (userid: string) => `/userinfo/${userid}`,
   },
   allowedFileTypes: ['*'], // Allow all file types - will be overridden by config endpoint
   maxFileSize: 100 * 1024 * 1024, // 100MB

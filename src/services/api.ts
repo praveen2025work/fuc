@@ -12,7 +12,8 @@ import {
   FileUpload, 
   ShareRequest, 
   UploadFilters,
-  User 
+  User,
+  UserInfoResponse
 } from '@/types/api';
 
 const api = axios.create({
@@ -164,7 +165,7 @@ export const apiService = {
   // Share file
   async shareFile(uploadId: number, shareRequest: ShareRequest): Promise<ApiResponse> {
     const response: AxiosResponse<ApiResponse> = await api.post(
-      `${API_CONFIG.endpoints.share}/${uploadId}`,
+      API_CONFIG.endpoints.share(uploadId),
       shareRequest,
       {
         headers: {
@@ -178,10 +179,18 @@ export const apiService = {
   // Download file
   async downloadFile(filename: string): Promise<Blob> {
     const response: AxiosResponse<Blob> = await api.get(
-      `${API_CONFIG.endpoints.download}/${encodeURIComponent(filename)}`,
+      API_CONFIG.endpoints.download(filename),
       {
         responseType: 'blob',
       }
+    );
+    return response.data;
+  },
+
+  // Get user info for email functionality
+  async getUserInfo(userid: string): Promise<UserInfoResponse> {
+    const response: AxiosResponse<UserInfoResponse> = await api.get(
+      API_CONFIG.endpoints.userinfo(userid)
     );
     return response.data;
   },

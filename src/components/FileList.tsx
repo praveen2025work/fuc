@@ -452,7 +452,9 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                   <TableHead>Size</TableHead>
                   <TableHead>Upload Time</TableHead>
                   <TableHead>User</TableHead>
+                  <TableHead>Application</TableHead>
                   <TableHead>Location</TableHead>
+                  <TableHead>Path</TableHead>
                   <TableHead>Downloads</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -461,7 +463,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                 <AnimatePresence>
                   {files.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                         {loading ? (
                           <div className="flex items-center justify-center gap-2">
                             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -494,6 +496,18 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                           <div className="flex items-center gap-1">
                             <User className="w-3 h-3" />
                             {file.user_id}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Building className="w-3 h-3" />
+                            {getApplicationName(file.application_id)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Folder className="w-3 h-3" />
+                            {getLocationName(file.location_id)}
                           </div>
                         </TableCell>
                         <TableCell className="max-w-xs truncate text-xs">
