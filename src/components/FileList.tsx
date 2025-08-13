@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { apiService } from '@/services/api';
 import { FileUpload, UploadFilters, Application, Location } from '@/types/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,6 +40,7 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
     to_date: getTodayDate(),
   });
   const [shareUserId, setShareUserId] = useState('');
+  const [sendEmail, setSendEmail] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
 
@@ -184,11 +186,14 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
     try {
       const response = await apiService.shareFile(selectedFileId, {
         shared_with: shareUserId.trim(),
+        send_email: sendEmail,
       });
       if (response.status === 'success') {
-        toast.success(response.message || 'File shared successfully');
+        const emailMessage = sendEmail ? ' Email notification sent.' : '';
+        toast.success((response.message || 'File shared successfully') + emailMessage);
         setShareDialogOpen(false);
         setShareUserId('');
+        setSendEmail(false);
         setSelectedFileId(null);
       } else {
         throw new Error(response.message || 'Share failed');
@@ -545,12 +550,28 @@ const FileList: React.FC<FileListProps> = ({ refreshTrigger }) => {
                 className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
               />
             </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="sendEmail"
+                checked={sendEmail}
+                onCheckedChange={(checked) => setSendEmail(checked as boolean)}
+              />
+              <Label 
+                htmlFor="sendEmail" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Send email notification
+              </Label>
+            </div>
+            
             <div className="flex gap-2 justify-end">
               <Button
                 variant="outline"
                 onClick={() => {
                   setShareDialogOpen(false);
                   setShareUserId('');
+                  setSendEmail(false);
                   setSelectedFileId(null);
                 }}
               >
